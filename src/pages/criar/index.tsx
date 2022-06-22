@@ -4,20 +4,12 @@ import { styled } from "../../../stitches.config";
 const Wrapper = styled("div", {
   height: "100vh",
   display: "flex",
-  flexDirection: "column",
   alignItems: "center",
   justifyContent: "center",
-  gap: "16px",
 });
 
-const SelectWrapper = styled("label", {
-  display: "flex",
-  flexDirection: "column",
-  width: "fit-content",
-});
+const FormContainer = styled("div", {
 
-const StyledSelect = styled("select", {
-  
 });
 
 const StyledOption = styled("option", {
@@ -38,14 +30,7 @@ const GenerateLinkButton = styled("button", {
 const Administrator: NextPage = () => {
   return (
     <Wrapper>
-      Criar link para sala:
-      <SelectWrapper>
-        Selecione o tipo de análise de tempo de reação:
-        <StyledSelect defaultValue={"simple"}>
-          <StyledOption value="simple">Simples</StyledOption>
-          <StyledOption value="choice">Escolha</StyledOption>
-        </StyledSelect>
-      </SelectWrapper>
+      Criar Sessão
 
       <GenerateLinkButton>
         Gerar link
