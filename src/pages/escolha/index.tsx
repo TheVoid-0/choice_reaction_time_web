@@ -2,7 +2,7 @@ import { styled } from "@stitches/react";
 import axios from "axios";
 import { NextPage } from "next";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Header, PageWrapper } from "../../styles/escolhas.style";
 
 const colors = ["Vermelho", "Amarelo", "Azul", "Verde"];
@@ -88,13 +88,16 @@ const ResultContent = styled("div", {
   alignItems: "center",
   fontSize: "32px",
   fontWeight: "bold",
-  color: "red",
   userSelect: "none",
 });
 
 const Escolha: NextPage = () => {
   const router = useRouter();
-  const [currentColor, setCurrentColor] = useState("");
+  const [started, setStarted] = useState(false);
+  const [currentColor, setCurrentColor] = useState<string>();
+  const [startTime, setStartTime] = useState<number>(0);
+
+  const [reactionTimes, setReactionTimes] = useState<number[]>([])
 
   const [email, setEmail] = useState("");
   const [userId, setUserId] = useState("");
@@ -102,7 +105,8 @@ const Escolha: NextPage = () => {
   const { sessionId } = router.query;
 
   const startSession = () => {
-    axios.post(`${process.env.NEXT_PUBLIC_CHOICE_REACTION_API}/users`, { email }).then(({ data }) => {
+    axios.post(`${process.env.NEXT_PUBLIC_CHOICE_REACTION_API}/users`, { email }).then(async ({ data }) => {
+      setStarted(true);
       setUserId(data.id);
       generateColor();
     });
@@ -118,13 +122,44 @@ const Escolha: NextPage = () => {
   }
 
   const generateColor = () => {
-    const random = Math.floor(Math.random() * (3 - 0) + 0);
-    setCurrentColor(colors[random]);
+    const random = Math.floor(Math.random() * (7 - 0) + 0);
+    setCurrentColor(colors[random > 3 ? Math.floor(random / 2) : random]);
+    setStartTime(Date.now());
   };
+
+  const handleButtonClick = useCallback((color: string) => {
+    console.log(color, currentColor)
+    if (color === currentColor) {
+      console.log(Date.now() - startTime);
+      reactionTimes.push(Date.now() - startTime);
+      generateColor();
+    }
+  }, [currentColor, reactionTimes, startTime]); 
 
   useEffect(() => {
     const handleKeyPress = (ev: KeyboardEvent) => {
-      console.log(ev.key)
+      if (!started) return;
+
+      switch (ev.key) {
+        case "q":
+        case "Q":
+          handleButtonClick("Vermelho");
+          break;
+        case "p":
+        case "P":
+          handleButtonClick("Verde");
+          break;
+        case "z":
+        case "Z":
+          handleButtonClick("Azul");
+          break;
+        case "m":
+        case "M":
+          handleButtonClick("Amarelo");
+          break;
+        default:
+          break;
+      }
     }
 
     window.addEventListener("keypress", handleKeyPress);
@@ -132,11 +167,14 @@ const Escolha: NextPage = () => {
     return () => {
       window.removeEventListener("keypress", handleKeyPress);
     }
-  }, [])
+  }, [handleButtonClick, started]);
 
   useEffect(() => {
+    if (reactionTimes.length === 10) {
+      setStarted(false);
 
-  }, [currentColor]);
+    }
+  }, [reactionTimes.length]);
 
   return (
     <PageWrapper>
@@ -163,7 +201,13 @@ const Escolha: NextPage = () => {
         </RowBetween>
 
         <RowCenter>
-          <ResultContent css={{ color: colorsObject[currentColor as keyof Colors] || "black" }}>{currentColor}</ResultContent>
+          {reactionTimes.length === 10 ? (
+            <ResultContent>
+              Finalizado
+            </ResultContent>
+          ): (
+            <ResultContent css={{ color: colorsObject[currentColor as keyof Colors] || "black" }}>{currentColor || "Cor que deverá clicar"}</ResultContent>
+          )}
         </RowCenter>
 
         <RowBetween>
