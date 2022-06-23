@@ -7,6 +7,20 @@ import { Header, PageWrapper } from "../../styles/escolhas.style";
 
 const colors = ["Vermelho", "Amarelo", "Azul", "Verde"];
 
+interface Colors {
+  Vermelho: string;
+  Amarelo: string;
+  Azul: string;
+  Verde: string;
+}
+
+const colorsObject = {
+  Vermelho: "red",
+  Amarelo: "yellow",
+  Azul: "blue",
+  Verde: "green",
+}
+
 const FormContainer = styled("div", {
   display: "flex",
   alignItems: "center",
@@ -69,14 +83,13 @@ const ResultContent = styled("div", {
   height: "100px",
   width: "fit-content",
   padding: "0 15px",
-  cursor: "pointer",
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
   fontSize: "32px",
   fontWeight: "bold",
-  border: "solid 1px #ccc",
-  color: "red"
+  color: "red",
+  userSelect: "none",
 });
 
 const Escolha: NextPage = () => {
@@ -90,8 +103,8 @@ const Escolha: NextPage = () => {
 
   const startSession = () => {
     axios.post(`${process.env.NEXT_PUBLIC_CHOICE_REACTION_API}/users`, { email }).then(({ data }) => {
-      // Iniciar sessao
-      setUserId(data.id)
+      setUserId(data.id);
+      generateColor();
     });
   };
 
@@ -108,6 +121,22 @@ const Escolha: NextPage = () => {
     const random = Math.floor(Math.random() * (3 - 0) + 0);
     setCurrentColor(colors[random]);
   };
+
+  useEffect(() => {
+    const handleKeyPress = (ev: KeyboardEvent) => {
+      console.log(ev.key)
+    }
+
+    window.addEventListener("keypress", handleKeyPress);
+
+    return () => {
+      window.removeEventListener("keypress", handleKeyPress);
+    }
+  }, [])
+
+  useEffect(() => {
+
+  }, [currentColor]);
 
   return (
     <PageWrapper>
@@ -134,12 +163,12 @@ const Escolha: NextPage = () => {
         </RowBetween>
 
         <RowCenter>
-          <ResultContent>VERMELHO</ResultContent>
+          <ResultContent css={{ color: colorsObject[currentColor as keyof Colors] || "black" }}>{currentColor}</ResultContent>
         </RowCenter>
 
         <RowBetween>
-          <Circle css={{ backgroundColor: "blue" }}>Q</Circle>
-          <Circle css={{ backgroundColor: "yellow" }}>P</Circle>
+          <Circle css={{ backgroundColor: "blue" }}>Z</Circle>
+          <Circle css={{ backgroundColor: "yellow" }}>M</Circle>
         </RowBetween>
 
       </CirclesContainer>
