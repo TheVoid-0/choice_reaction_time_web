@@ -1,8 +1,7 @@
 import axios from "axios";
 import { NextPage } from "next";
-import { useState , useEffect } from "react";
+import { useState, useEffect } from "react";
 import { styled } from "../../../stitches.config";
-
 
 const Wrapper = styled("div", {
   height: "100vh",
@@ -11,15 +10,9 @@ const Wrapper = styled("div", {
   justifyContent: "center",
 });
 
+const FormContainer = styled("div", {});
 
-
-const FormContainer = styled("div", {
-  
-});
-
-const StyledOption = styled("option", {
-
-});
+const StyledOption = styled("option", {});
 
 const GenerateLinkButton = styled("button", {
   all: "unset",
@@ -34,38 +27,62 @@ const GenerateLinkButton = styled("button", {
 
 const Administrator: NextPage = () => {
   const [formData, setFormData] = useState({
-    email: ''
-  })
+    name: "",
+    user: {
+      email: "",
+      age: 0,
+    },
+  });
 
-  const [shortlink, setShortlink] = useState<string>('Seu link')
+  const [shortlink, setShortlink] = useState<string>("Seu link");
 
-  
   const createSession = () => {
-    axios.post(`http://localhost:3002/test-sessions`, {
-      user: formData
-    }).then(({data}) => {
-      console.log(data)
-      setShortlink(data.shortlink)
-    }).catch(console.log)
-  }
-
-  const handleFormChange = (target: EventTarget & HTMLInputElement, prop: keyof typeof formData) => {
-    console.log(target.value)
-    setFormData({...formData, [prop] : target.value})
-  }
+    axios
+      .post(
+        `${process.env.NEXT_PUBLIC_CHOICE_REACTION_API}/test-sessions`,
+        formData
+      )
+      .then(({ data }) => {
+        console.log(data);
+        setShortlink(data.shortlink);
+      })
+      .catch(console.log);
+  };
 
   return (
     <Wrapper>
       Criar Sessão
       <FormContainer>
-        <input id="email" type="text" onChange={({target}) => handleFormChange(target, 'email')}  />
-      <GenerateLinkButton onClick={createSession.bind(formData)}>
-        Gerar link
-      </GenerateLinkButton>
+        <input
+          id="email"
+          type="text"
+          onChange={({ target }) => {
+            formData.user.email = target.value;
+            setFormData(formData);
+          }}
+        />
+        <input
+          id="name"
+          type="text"
+          onChange={({ target }) => {
+            formData.name = target.value;
+            setFormData(formData);
+          }}
+        />
+        <input
+          id="age"
+          type="text"
+          onChange={({ target }) => {
+            formData.user.age = Number.isNaN(+target.value) ? 0 : +target.value;
+            setFormData(formData);
+          }}
+        />
+        <GenerateLinkButton onClick={createSession.bind(formData)}>
+          Gerar link
+        </GenerateLinkButton>
       </FormContainer>
-
       <a href={shortlink}>{shortlink}</a>
     </Wrapper>
   );
-}
+};
 export default Administrator;

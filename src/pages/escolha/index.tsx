@@ -89,14 +89,14 @@ const Escolha: NextPage = () => {
   const { sessionId } = router.query;
 
   const startSession = () => {
-    axios.post("http://localhost:3002/users", { email }).then(({ data }) => {
+    axios.post(`${process.env.NEXT_PUBLIC_CHOICE_REACTION_API}/users`, { email }).then(({ data }) => {
       // Iniciar sessao
       setUserId(data.id)
     });
   };
 
   const endSession = () => {
-    axios.post(`http://localhost:3002/test-sessions/:${sessionId}/attempts`, {
+    axios.post(`${process.env.NEXT_PUBLIC_CHOICE_REACTION_API}/test-sessions/:${sessionId}/attempts`, {
       results: JSON.stringify({ 1: 400.40, 2: 353.20 }),
       userId
     }).then(() => {
