@@ -7,9 +7,77 @@ import { Header, PageWrapper } from "../../styles/escolhas.style";
 
 const colors = ["Vermelho", "Amarelo", "Azul", "Verde"];
 
-const FormContainer = styled("div", {});
+const FormContainer = styled("div", {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+});
 
+const RowBetween = styled("div", {
+  display: "flex",
+  flexDirection: "row",
+  width: "100%",
+  justifyContent: "space-between",
+});
 
+const RowCenter = styled("div", {
+  display: "flex",
+  flexDirection: "row",
+  width: "100%",
+  justifyContent: "center",
+});
+
+const InitButton = styled("button", {
+  all: "unset",
+  width: "fit-content",
+  display: "flex",
+  padding: "8px 16px",
+  borderRadius: "6px",
+  cursor: "pointer",
+  color: "#FFFFFF",
+  backgroundColor: "#3262F2",
+  marginLeft: "20px"
+});
+
+const CirclesContainer = styled("div", {
+  display: "flex",
+  flexDirection: "column",
+  width: "500px",
+  height: "350px",
+  border: "solid 1px #ccc",
+  padding: "20px",
+  margin: "20px auto 20px auto",
+});
+
+const Circle = styled("div", {
+  all: "unset",
+  height: "100px",
+  width: "100px",
+  cursor: "pointer",
+  borderRadius: "50%",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  color: "#F4F4F4",
+  fontSize: "28px",
+  fontWeight: "bold",
+  backgroundColor: "red"
+});
+
+const ResultContent = styled("div", {
+  all: "unset",
+  height: "100px",
+  width: "fit-content",
+  padding: "0 15px",
+  cursor: "pointer",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  fontSize: "32px",
+  fontWeight: "bold",
+  border: "solid 1px #ccc",
+  color: "red"
+});
 
 const Escolha: NextPage = () => {
   const router = useRouter();
@@ -21,15 +89,15 @@ const Escolha: NextPage = () => {
   const { sessionId } = router.query;
 
   const startSession = () => {
-    axios.post("http://localhost:3002/users", { email }).then(({data}) => {
+    axios.post("http://localhost:3002/users", { email }).then(({ data }) => {
       // Iniciar sessao
       setUserId(data.id)
     });
   };
 
   const endSession = () => {
-    axios.post(`http://localhost:3002/test-sessions/:${sessionId}/attempts`,{
-      results: JSON.stringify({1: 400.40, 2: 353.20}),
+    axios.post(`http://localhost:3002/test-sessions/:${sessionId}/attempts`, {
+      results: JSON.stringify({ 1: 400.40, 2: 353.20 }),
       userId
     }).then(() => {
       console.log(`sucesso`)
@@ -52,11 +120,29 @@ const Escolha: NextPage = () => {
         <input
           id="email"
           type="text"
+          placeholder="email"
           onChange={({ target }) => setEmail(target.value)}
         />
 
-        <button onClick={() => startSession()}> Iniciar</button>
+        <InitButton onClick={() => startSession()}> Iniciar</InitButton>
       </FormContainer>
+
+      <CirclesContainer>
+        <RowBetween>
+          <Circle css={{ backgroundColor: "red" }}>Q</Circle>
+          <Circle css={{ backgroundColor: "green" }}>P</Circle>
+        </RowBetween>
+
+        <RowCenter>
+          <ResultContent>VERMELHO</ResultContent>
+        </RowCenter>
+
+        <RowBetween>
+          <Circle css={{ backgroundColor: "blue" }}>Q</Circle>
+          <Circle css={{ backgroundColor: "yellow" }}>P</Circle>
+        </RowBetween>
+
+      </CirclesContainer>
     </PageWrapper>
   );
 };
