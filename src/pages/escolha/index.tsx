@@ -157,7 +157,7 @@ const Escolha: NextPage = () => {
     reactionTimes.forEach((value, index) => {
       results[index + 1] = value;
     });
-    axios.post(`${process.env.NEXT_PUBLIC_CHOICE_REACTION_API}/test-sessions/:${sessionId}/attempts`, {
+    axios.post(`${process.env.NEXT_PUBLIC_CHOICE_REACTION_API}/test-sessions/${sessionId}/attempts`, {
       results: JSON.stringify(results),
       userId
     }).then(() => {
