@@ -2,7 +2,7 @@ import { styled } from "@stitches/react";
 import axios from "axios";
 import { NextPage } from "next";
 import { useRouter } from "next/router";
-import { useCallback, useEffect, useState } from "react";
+import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import { Header, PageWrapper } from "../../styles/escolhas.style";
 
 const colors = ["Vermelho", "Amarelo", "Azul", "Verde"];
@@ -21,10 +21,26 @@ const colorsObject = {
   Verde: "green",
 }
 
-const FormContainer = styled("div", {
+const FormContainer = styled("form", {
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
+  flexDirection: "column",
+  gap: "8px"
+});
+
+const FormField = styled("div", {
+  display: "flex",
+  flexDirection: "column",
+  gap: "4px",
+
+  input: {
+    all: "unset",
+    border: "1px solid #ababab",
+    borderRadius: "4px",
+    padding: "8px 16px",
+    boxSizing: "border-box",
+  }
 });
 
 const RowBetween = styled("div", {
@@ -38,19 +54,26 @@ const RowCenter = styled("div", {
   display: "flex",
   flexDirection: "row",
   width: "100%",
+  height: "100%",
   justifyContent: "center",
+  alignItems: "center",
 });
 
-const InitButton = styled("button", {
+const Button = styled("button", {
   all: "unset",
   width: "fit-content",
   display: "flex",
   padding: "8px 16px",
   borderRadius: "6px",
   cursor: "pointer",
+  height: "fit-content",
   color: "#FFFFFF",
-  backgroundColor: "#3262F2",
-  marginLeft: "20px"
+  backgroundColor: "#d00000",
+  transition: "background-color 0.2s",
+
+  "&:hover": {
+    backgroundColor: "#9d0208"
+  }
 });
 
 const CirclesContainer = styled("div", {
@@ -59,6 +82,7 @@ const CirclesContainer = styled("div", {
   width: "500px",
   height: "350px",
   border: "solid 1px #ccc",
+  borderRadius: "4px",
   padding: "20px",
   margin: "20px auto 20px auto",
 });
@@ -80,16 +104,24 @@ const Circle = styled("div", {
 
 const ResultContent = styled("div", {
   all: "unset",
-  height: "100px",
+  height: "100%",
   width: "fit-content",
   padding: "0 15px",
   display: "flex",
+  flexShrink: 0,
   justifyContent: "center",
   alignItems: "center",
   fontSize: "32px",
   fontWeight: "bold",
   userSelect: "none",
 });
+
+const FinishContainer = styled("div", {
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  gap: "16px"
+})
 
 const Escolha: NextPage = () => {
   const router = useRouter();
@@ -99,13 +131,21 @@ const Escolha: NextPage = () => {
 
   const [reactionTimes, setReactionTimes] = useState<number[]>([])
 
-  const [email, setEmail] = useState("");
+  const email = useRef<string>("");
+  const nome = useRef<string>("");
+  const idade = useRef<string>("");
   const [userId, setUserId] = useState("");
 
   const { sessionId } = router.query;
 
-  const startSession = () => {
-    axios.post(`${process.env.NEXT_PUBLIC_CHOICE_REACTION_API}/users`, { email }).then(async ({ data }) => {
+  const startSession = (e: FormEvent) => {
+    e.preventDefault();
+    const formData = {
+      name: nome.current,
+      email: email.current,
+      age: idade.current,
+    }
+    axios.post(`${process.env.NEXT_PUBLIC_CHOICE_REACTION_API}/users`, formData).then(async ({ data }) => {
       setStarted(true);
       setUserId(data.id);
       generateColor();
@@ -113,8 +153,12 @@ const Escolha: NextPage = () => {
   };
 
   const endSession = () => {
+    const results: Record<number, number> = {};
+    reactionTimes.forEach((value, index) => {
+      results[index + 1] = value;
+    });
     axios.post(`${process.env.NEXT_PUBLIC_CHOICE_REACTION_API}/test-sessions/:${sessionId}/attempts`, {
-      results: JSON.stringify({ 1: 400.40, 2: 353.20 }),
+      results: JSON.stringify(results),
       userId
     }).then(() => {
       console.log(`sucesso`)
@@ -134,7 +178,16 @@ const Escolha: NextPage = () => {
       reactionTimes.push(Date.now() - startTime);
       generateColor();
     }
-  }, [currentColor, reactionTimes, startTime]); 
+  }, [currentColor, reactionTimes, startTime]);
+  
+  const getAverage = () => {
+    let sum = 0;
+    reactionTimes.forEach((reaction) => {
+      sum += reaction;
+    });
+
+    return sum / reactionTimes.length;
+  }
 
   useEffect(() => {
     const handleKeyPress = (ev: KeyboardEvent) => {
@@ -183,15 +236,39 @@ const Escolha: NextPage = () => {
         <p>Para começar, informe seus dados e clique no botão INICIAR.</p>
       </Header>
 
-      <FormContainer>
-        <input
-          id="email"
-          type="text"
-          placeholder="email"
-          onChange={({ target }) => setEmail(target.value)}
-        />
+      <FormContainer onSubmit={startSession}>
+        <FormField>
+          <input
+            id="email"
+            type={"email"}
+            placeholder="Email"
+            required
+            onChange={({ target }) => email.current = target.value}
+          />
+        </FormField>
 
-        <InitButton onClick={() => startSession()}> Iniciar</InitButton>
+        <FormField>
+          <input
+            id="name"
+            type={"text"}
+            placeholder="Nome"
+            required
+            onChange={({ target }) => nome.current = target.value}
+          />
+        </FormField>
+
+        <FormField>
+          <input
+            id="age"
+            type={"number"}
+            min={"0"}
+            placeholder="Idade"
+            required
+            onChange={({ target }) => idade.current = target.value}
+          />
+        </FormField>
+
+        <Button type="submit">Iniciar</Button>
       </FormContainer>
 
       <CirclesContainer>
@@ -202,10 +279,13 @@ const Escolha: NextPage = () => {
 
         <RowCenter>
           {reactionTimes.length === 10 ? (
-            <ResultContent>
-              Finalizado
-            </ResultContent>
-          ): (
+            <FinishContainer>
+              <span><b>{"Média: "}</b>{getAverage()}</span>
+              <Button onClick={endSession}>
+                Finalizar
+              </Button>
+            </FinishContainer>
+          ) : (
             <ResultContent css={{ color: colorsObject[currentColor as keyof Colors] || "black" }}>{currentColor || "Cor que deverá clicar"}</ResultContent>
           )}
         </RowCenter>

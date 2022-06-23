@@ -11,8 +11,8 @@ export const Header = styled("section", {
   flexDirection: "column",
   alignItems: "center",
   justifyContent: "center",
-  padding: "32px 48px",
-  gap: "24px",
+  padding: "16px 48px",
+  gap: "12px",
 
   h2: {
     margin: 0,

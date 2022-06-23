@@ -46,12 +46,12 @@ const GenerateLinkButton = styled("button", {
   borderRadius: "6px",
   cursor: "pointer",
   color: "#FFFFFF",
-  backgroundColor: "#3262F2",
+  backgroundColor: "#d00000",
   marginTop: "12px",
   transition: "background-color .2s",
 
   "&:hover": {
-    backgroundColor: "#2445aa",
+    backgroundColor: "#9d0208",
   }
 });
 
@@ -60,7 +60,7 @@ const Administrator: NextPage = () => {
     name: "",
     user: {
       email: "",
-      age: 0,
+      name: "",
     },
   });
 
@@ -88,7 +88,7 @@ const Administrator: NextPage = () => {
             <label htmlFor="email">E-mail</label>
             <input
               id="email"
-              type="text"
+              type="email"
               onChange={({ target }) => {
                 formData.user.email = target.value;
                 setFormData(formData);
@@ -102,19 +102,19 @@ const Administrator: NextPage = () => {
               id="name"
               type="text"
               onChange={({ target }) => {
-                formData.name = target.value;
+                formData.user.name = target.value;
                 setFormData(formData);
               }}
             />
           </FormField>
 
           <FormField>
-            <label htmlFor="age">Idade</label>
+            <label htmlFor="sessionName">Nome da Sessão</label>
             <input
-              id="age"
+              id="sessionName"
               type="text"
               onChange={({ target }) => {
-                formData.user.age = Number.isNaN(+target.value) ? 0 : +target.value;
+                formData.name = target.value;
                 setFormData(formData);
               }}
             />
