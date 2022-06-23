@@ -57,15 +57,13 @@ const ListWrapper = styled("div", {
   gap: "16px",
   width: "100%",
   maxWidth: "fit-content",
+  paddingBottom: "32px"
 });
 
 const ListItem = styled("div", {
   display: "flex",
   flexDirection: "column",
   gap: "8px",
-  padding: "8px 16px",
-  borderRadius: "6px",
-  boxShadow: "0px 2px 6px 0px #45454599"
 });
 
 const ItemTitle = styled("span", {
@@ -76,6 +74,13 @@ const ItemContent = styled("ul", {
   all: "unset",
 });
 
+const Attempt = styled("li", {
+  all: "unset",
+  borderRadius: "6px",
+  boxShadow: "0px 2px 6px 0px #45454599",
+  padding: "8px 16px",
+})
+
 interface SessionType {
   id: string;
   name: string;
@@ -84,13 +89,12 @@ interface SessionType {
 const Buscar: NextPage = () => {
   const email = useRef<string>("");
   const [sessions, setSessions] = useState<SessionType[]>([]);
-  const [attempts, setAttempts] = useState<[]>([]);
 
   const handleSearch = (ev: FormEvent) => {
     ev.preventDefault();
     setSessions([])
     axios.get(`${process.env.NEXT_PUBLIC_CHOICE_REACTION_API}/users`, { params: { email: email.current } }).then(({ data }) => {
-      console.log(data);
+      console.log("sessoes", data);
       data.sessions.forEach((session: { id: string, name: string }) => {
         console.log(session)
         setSessions((prevState) => [...prevState, {
@@ -103,13 +107,34 @@ const Buscar: NextPage = () => {
     })
   };
 
-  const getSessionAttempts = (sessionId: string) => {
-    const attempts = [];
-    axios.get(`${process.env.NEXT_PUBLIC_CHOICE_REACTION_API}/test-sessions/${sessionId}`).then(({ data }) => {
-      attempts.push(data.testAttempts)
+  const getSessionAttempts = async (sessionId: string) => {
+    const attempts: Record<string, {
+      id: string
+      results: string
+      testSessionId: string
+      userId: string;
+      avg: number
+    }> = {};
+    await axios.get(`${process.env.NEXT_PUBLIC_CHOICE_REACTION_API}/test-sessions/${sessionId}`).then(({ data }) => {
+      Object.entries(data.testAttempts).map(([idade, tentativas]: [string, any]) => {
+        attempts[idade] = tentativas;
+      })
     });
 
-    return "";
+    console.log(JSON.parse(attempts[22].results))
+
+    return (
+      <React.Fragment>
+        {Object.entries(attempts).map(([idade, tentativas], index) => (
+          <Attempt key={index}>
+            <b>Idade:</b><span>{idade}</span>
+            <span>Tentativas</span>
+            <ul>
+            </ul>
+          </Attempt>
+        ))}
+      </React.Fragment>
+    )
   }
 
   useEffect(() => {

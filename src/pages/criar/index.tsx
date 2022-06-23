@@ -73,7 +73,6 @@ const Administrator: NextPage = () => {
         formData
       )
       .then(({ data }) => {
-        console.log(data);
         setShortlink(data.shortlink);
       })
       .catch(console.log);
